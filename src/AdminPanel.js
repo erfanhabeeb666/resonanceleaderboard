@@ -186,7 +186,7 @@ const AdminPanel = () => {
             type="submit"
             className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
           >
-            Add Result
+            Publish Result
           </button>
         </form>
       </div>
