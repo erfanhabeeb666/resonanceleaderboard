@@ -134,7 +134,7 @@ const AdminPanel = () => {
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-50 p-6 space-y-10">
-      <h1 className="text-2xl font-bold">⚙️ Admin Panel</h1>
+     
 
       {/* 🏆 Add Competition Section */}
       <div className="bg-white p-6 shadow rounded w-full max-w-2xl">
