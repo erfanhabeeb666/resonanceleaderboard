@@ -1,8 +1,11 @@
 // src/AdminPanel.js
 import React, { useEffect, useState } from "react";
-import { getLeaderboard, updateLeaderboard, addCompetitionResult } from "./Leaderboardservice";
+import {
+  getLeaderboard,
+  updateLeaderboard,
+  addCompetitionResult,
+} from "./Leaderboardservice";
 import { addCompetitionLog } from "./competitionService";
-
 
 const AdminPanel = () => {
   const [data, setData] = useState([]);
@@ -20,11 +23,14 @@ const AdminPanel = () => {
   const [secondPoints, setSecondPoints] = useState(7);
   const [thirdPoints, setThirdPoints] = useState(5);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const ADMIN_PASSWORD = "college123";
 
   useEffect(() => {
     if (authenticated) {
       const loadData = async () => {
+        setLoading(true);
         const scores = await getLeaderboard();
         setData(scores);
         setLoading(false);
@@ -34,8 +40,10 @@ const AdminPanel = () => {
   }, [authenticated]);
 
   const handleChange = (houseName, value) => {
-    setData(prev =>
-      prev.map(item => item.house === houseName ? { ...item, points: Number(value) } : item)
+    setData((prev) =>
+      prev.map((item) =>
+        item.house === houseName ? { ...item, points: Number(value) } : item
+      )
     );
   };
 
@@ -44,6 +52,7 @@ const AdminPanel = () => {
       await updateLeaderboard(data);
       alert("✅ Scores updated successfully!");
     } catch (error) {
+      console.error(error);
       alert("❌ Failed to update scores!");
     }
   };
@@ -51,12 +60,24 @@ const AdminPanel = () => {
   const handleCompetitionSubmit = async (e) => {
     e.preventDefault();
 
-    if (!competitionName) {
+    // basic validations
+    if (!competitionName.trim()) {
       alert("❌ Please enter a competition name!");
       return;
     }
+    if (!first || !second || !third) {
+      alert("❌ Please select all three positions!");
+      return;
+    }
+    // ensure distinct winners
+    if (first === second || first === third || second === third) {
+      alert("❌ A house cannot occupy multiple positions. Choose distinct houses.");
+      return;
+    }
 
+    setIsSubmitting(true);
     try {
+      // update leaderboard totals
       await addCompetitionResult(first, second, third, {
         first: Number(firstPoints),
         second: Number(secondPoints),
@@ -64,20 +85,14 @@ const AdminPanel = () => {
         competition: competitionName,
       });
 
-      // 2️⃣ Log competition
-      await addCompetitionLog(
-        competitionName,
-        first,
-        second,
-        third,
-        {
-          first: Number(firstPoints),
-          second: Number(secondPoints),
-          third: Number(thirdPoints)
-        }
-      );
+      // log competition history
+      await addCompetitionLog(competitionName, first, second, third, {
+        first: Number(firstPoints),
+        second: Number(secondPoints),
+        third: Number(thirdPoints),
+      });
 
-      // 3️⃣ Refresh leaderboard
+      // refresh local scoreboard
       const scores = await getLeaderboard();
       setData(scores);
 
@@ -88,9 +103,14 @@ const AdminPanel = () => {
       setFirst("");
       setSecond("");
       setThird("");
+      setFirstPoints(10);
+      setSecondPoints(7);
+      setThirdPoints(5);
     } catch (error) {
-      alert("❌ Failed to add competition results!");
       console.error(error);
+      alert("❌ Failed to add competition results!");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -134,7 +154,7 @@ const AdminPanel = () => {
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-50 p-6 space-y-10">
-     
+      <h1 className="text-2xl font-bold">⚙️ Admin Panel</h1>
 
       {/* 🏆 Add Competition Section */}
       <div className="bg-white p-6 shadow rounded w-full max-w-2xl">
@@ -153,9 +173,29 @@ const AdminPanel = () => {
           </div>
 
           <div className="grid grid-cols-3 gap-4">
-            {[{ pos: "First", value: first, setValue: setFirst, points: firstPoints, setPoints: setFirstPoints },
-              { pos: "Second", value: second, setValue: setSecond, points: secondPoints, setPoints: setSecondPoints },
-              { pos: "Third", value: third, setValue: setThird, points: thirdPoints, setPoints: setThirdPoints }].map((item, i) => (
+            {[
+              {
+                pos: "First",
+                value: first,
+                setValue: setFirst,
+                points: firstPoints,
+                setPoints: setFirstPoints,
+              },
+              {
+                pos: "Second",
+                value: second,
+                setValue: setSecond,
+                points: secondPoints,
+                setPoints: setSecondPoints,
+              },
+              {
+                pos: "Third",
+                value: third,
+                setValue: setThird,
+                points: thirdPoints,
+                setPoints: setThirdPoints,
+              },
+            ].map((item, i) => (
               <div key={i}>
                 <label className="block font-medium">{item.pos} Place</label>
                 <select
@@ -174,7 +214,7 @@ const AdminPanel = () => {
                 <input
                   type="number"
                   value={item.points}
-                  onChange={(e) => item.setPoints(e.target.value)}
+                  onChange={(e) => item.setPoints(Number(e.target.value))}
                   className="border rounded w-full px-2 py-1 mt-1"
                   placeholder="Points"
                 />
@@ -184,9 +224,10 @@ const AdminPanel = () => {
 
           <button
             type="submit"
-            className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+            disabled={isSubmitting}
+            className={`px-6 py-2 rounded text-white ${isSubmitting ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"}`}
           >
-            Publish Result
+            {isSubmitting ? "Publishing..." : "Publish Result"}
           </button>
         </form>
       </div>
@@ -196,10 +237,7 @@ const AdminPanel = () => {
         <h2 className="text-xl font-semibold mb-4">✏️ Edit Scores Manually</h2>
         <div className="space-y-3">
           {data.map((row) => (
-            <div
-              key={row.house}
-              className="flex justify-between bg-gray-50 p-3 rounded"
-            >
+            <div key={row.house} className="flex justify-between bg-gray-50 p-3 rounded">
               <span>{row.house} - {row.lastCompetition || "No competition yet"}</span>
               <input
                 type="number"
@@ -214,7 +252,7 @@ const AdminPanel = () => {
           onClick={handleSave}
           className="mt-4 px-6 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
         >
-          Publish Result
+          Save Scores
         </button>
       </div>
     </div>
