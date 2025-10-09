@@ -77,14 +77,14 @@ export async function addCompetitionResult(first, second, third, points) {
   const updated = current.map((h) => {
     const currentPoints = Number(h.points || 0);
 
-    if (h.house === first) {
-      return { ...h, points: currentPoints + fp, lastCompetition: compName };
-    }
-    if (h.house === second) {
-      return { ...h, points: currentPoints + sp, lastCompetition: compName };
-    }
-    if (h.house === third) {
-      return { ...h, points: currentPoints + tp, lastCompetition: compName };
+    // Sum points if the same house appears in multiple positions
+    const bonus =
+      (h.house === first ? fp : 0) +
+      (h.house === second ? sp : 0) +
+      (h.house === third ? tp : 0);
+
+    if (bonus > 0) {
+      return { ...h, points: currentPoints + bonus, lastCompetition: compName };
     }
     return h;
   });

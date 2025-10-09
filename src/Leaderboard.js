@@ -32,27 +32,40 @@ const Leaderboard = () => {
     loadData();
   }, []);
 
-  // Calculate top performer by most 1st places
+  // Calculate top performer (most 1st places). If unavailable, fall back to points leader.
   useEffect(() => {
-    if (competitions.length > 0) {
-      const firstPlaceCount = {};
-      competitions.forEach((c) => {
-        const winner = c.winners[0]?.house;
-        if (winner) {
-          firstPlaceCount[winner] = (firstPlaceCount[winner] || 0) + 1;
-        }
-      });
+    if (competitions.length === 0) {
+      setTopPerformer(null);
+      return;
+    }
 
+    const firstPlaceCount = {};
+    competitions.forEach((c) => {
+      const winner = c?.winners?.[0]?.house || c?.first; // support legacy shape
+      if (winner) {
+        firstPlaceCount[winner] = (firstPlaceCount[winner] || 0) + 1;
+      }
+    });
+
+    if (Object.keys(firstPlaceCount).length > 0) {
       let best = null;
       Object.entries(firstPlaceCount).forEach(([house, count]) => {
         if (!best || count > best.count) {
-          best = { house, count };
+          best = { house, count, metric: "first" };
         }
       });
-
       setTopPerformer(best);
+      return;
     }
-  }, [competitions]);
+
+    // Fallback: use current leaderboard points leader
+    if (houses.length > 0) {
+      const sorted = [...houses].sort((a, b) => Number(b.points || 0) - Number(a.points || 0));
+      setTopPerformer({ house: sorted[0].house, count: sorted[0].points, metric: "points" });
+    } else {
+      setTopPerformer(null);
+    }
+  }, [competitions, houses]);
 
   const sortedHouses = [...houses].sort((a, b) => Number(b.points || 0) - Number(a.points || 0));
 
@@ -127,32 +140,26 @@ const Leaderboard = () => {
               <CardContent className="text-center">
                 <h2 className="text-xl font-semibold mb-2">🌟 Top Performer</h2>
                 <p className="text-lg">
-                  <strong>{topPerformer.house}</strong> won most 1st places ({topPerformer.count} times)!
+                  <strong>{topPerformer.house}</strong>{" "}
+                  {topPerformer.metric === "first"
+                    ? `won most 1st places (${topPerformer.count} times)!`
+                    : `leads the leaderboard with ${topPerformer.count} points.`}
                 </p>
               </CardContent>
             </Card>
           )}
 
-          {/* Score Trend Chart */}
+          {/* Group Points Chart */}
           <Card className="shadow-lg md:col-span-2">
             <CardContent>
-              <h2 className="text-xl font-semibold mb-4">📈 Score Trends</h2>
-              <BarChart width={600} height={300} data={competitions}>
+              <h2 className="text-xl font-semibold mb-4">📊 Group Points</h2>
+              <BarChart width={600} height={300} data={sortedHouses}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="competition" />
+                <XAxis dataKey="house" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                {houses.map((house) => (
-                  <Bar
-                    key={house.house}
-                    dataKey={(d) =>
-                      d.winners.find((w) => w.house === house.house)?.points || 0
-                    }
-                    name={house.house}
-                    fill="#8884d8"
-                  />
-                ))}
+                <Bar dataKey="points" name="Points" fill="#8884d8" />
               </BarChart>
             </CardContent>
           </Card>

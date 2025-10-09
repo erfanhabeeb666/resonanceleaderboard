@@ -69,11 +69,6 @@ const AdminPanel = () => {
       alert("❌ Please select all three positions!");
       return;
     }
-    // ensure distinct winners
-    if (first === second || first === third || second === third) {
-      alert("❌ A house cannot occupy multiple positions. Choose distinct houses.");
-      return;
-    }
 
     setIsSubmitting(true);
     try {
