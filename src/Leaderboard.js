@@ -68,12 +68,37 @@ const Leaderboard = () => {
   }, [competitions, houses]);
 
   const sortedHouses = [...houses].sort((a, b) => Number(b.points || 0) - Number(a.points || 0));
+  const captainPhotos = {
+    "group one": "/captains/mavericks.jpeg",
+    "group two": "/captains/igniters.jpeg",
+    "group three": "/captains/catalyst.jpeg",
+    "group four": "/captains/astra.jpeg",
+  };
+  const getCaptainPhoto = (house) =>
+    captainPhotos[String(house || "").toLowerCase()] || "https://via.placeholder.com/96";
+  const captainOrder = ["Group One", "Group Two", "Group Three", "Group Four"];
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h1 className="text-3xl font-bold text-center mb-8 text-indigo-700">
         🏆 Resonance Leaderboard
       </h1>
+
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold text-center mb-4">Group Captains</h2>
+        <div className="flex flex-wrap justify-center gap-6">
+          {captainOrder.map((name) => (
+            <div key={name} className="flex flex-col items-center">
+              <img
+                src={getCaptainPhoto(name)}
+                alt={`${name} Captain`}
+                className="w-24 h-24 rounded-full object-cover border-4 border-indigo-200 shadow"
+              />
+              <div className="mt-2 text-sm font-medium text-gray-700">{name} Captain</div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {loading ? (
         <p className="text-gray-600 text-center">Loading data...</p>
