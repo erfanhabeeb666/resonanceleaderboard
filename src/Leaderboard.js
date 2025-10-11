@@ -87,7 +87,7 @@ const Leaderboard = () => {
       </h1>
 
       <div className="mb-8">
-        <h2 className="text-lg font-semibold text-center mb-4">Group Captains</h2>
+        <h2 className="text-lg font-semibold text-center mb-4">Resonance Houses</h2>
         <div className="flex flex-wrap justify-center gap-6">
           {captainOrder.map((name) => (
             <div key={name} className="flex flex-col items-center">
@@ -96,7 +96,7 @@ const Leaderboard = () => {
                 alt={`${name} Captain`}
                 className="w-24 h-24 rounded-full object-cover border-4 border-indigo-200 shadow"
               />
-              <div className="mt-2 text-sm font-medium text-gray-700">{name} Captain</div>
+              <div className="mt-2 text-sm font-medium text-gray-700">{name}</div>
             </div>
           ))}
         </div>
