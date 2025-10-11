@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { getLeaderboard } from "./Leaderboardservice";
 import { getCompetitions } from "./competitionService";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 
 // ✅ Simple Card components
 const Card = ({ children, className = "" }) => (
@@ -180,14 +180,25 @@ const Leaderboard = () => {
           <Card className="shadow-lg md:col-span-2">
             <CardContent>
               <h2 className="text-xl font-semibold mb-4">📊 Group Points</h2>
-              <BarChart width={600} height={300} data={sortedHouses}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="house" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="points" name="Points" fill="#8884d8" />
-              </BarChart>
+              <div className="w-full h-56 md:h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={sortedHouses} margin={{ top: 8, right: 8, left: 0, bottom: 56 }} barCategoryGap={10}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="house"
+                      interval={0}
+                      tick={{ fontSize: 10 }}
+                      angle={-35}
+                      textAnchor="end"
+                      tickMargin={12}
+                      height={36}
+                    />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <Bar dataKey="points" name="Points" fill="#8884d8" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </CardContent>
           </Card>
         </div>
