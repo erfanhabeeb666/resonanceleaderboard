@@ -69,14 +69,16 @@ const Leaderboard = () => {
 
   const sortedHouses = [...houses].sort((a, b) => Number(b.points || 0) - Number(a.points || 0));
   const captainPhotos = {
-    "group one": "/captains/mavericks.jpeg",
-    "group two": "/captains/igniters.jpeg",
-    "group three": "/captains/catalyst.jpeg",
-    "group four": "/captains/astra.jpeg",
+    "Mavericks": "/captains/mavericks.jpeg",
+    "Igniters": "/captains/igniters.jpeg",
+    "Catalyst": "/captains/catalyst.jpeg",
+    "Astra": "/captains/astra.jpeg",
   };
   const getCaptainPhoto = (house) =>
-    captainPhotos[String(house || "").toLowerCase()] || "https://via.placeholder.com/96";
-  const captainOrder = ["Group One", "Group Two", "Group Three", "Group Four"];
+    captainPhotos[house] ||
+    captainPhotos[String(house || "").toLowerCase()] ||
+    "https://via.placeholder.com/96";
+  const captainOrder = ["Mavericks", "Igniters", "Catalyst", "Astra"];
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
