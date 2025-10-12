@@ -80,11 +80,23 @@ const Leaderboard = () => {
     "https://via.placeholder.com/96";
   const captainOrder = ["Mavericks", "Igniters", "Catalyst", "Astra"];
 
+  const openSchedule = () => {
+    window.open('/Resonance25Chart.pdf', '_blank');
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
-      <h1 className="text-3xl font-bold text-center mb-8 text-indigo-700">
-        🏆 Resonance Leaderboard
-      </h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-indigo-700">
+          🏆 Resonance Leaderboard
+        </h1>
+        <button 
+          onClick={openSchedule}
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white"
+        >
+          View Schedule
+        </button>
+      </div>
 
       <div className="mb-8">
         <h2 className="text-lg font-semibold text-center mb-4">Resonance Houses</h2>
